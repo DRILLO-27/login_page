@@ -9,113 +9,141 @@ class CitasPage extends StatefulWidget {
 }
 
 class _CitasPageState extends State<CitasPage> {
-  final TextEditingController _motivoController = TextEditingController();
-  final TextEditingController _doctorController = TextEditingController();
-  final TextEditingController _pacienteController = TextEditingController();
-
   final CollectionReference citas =
       FirebaseFirestore.instance.collection('citas');
 
-  String? _selectedCitaId;
+  final TextEditingController motivoController = TextEditingController();
+  final TextEditingController fechaController = TextEditingController();
+  final TextEditingController horaInicioController = TextEditingController();
+  final TextEditingController horaFinController = TextEditingController();
+  final TextEditingController pacienteController = TextEditingController();
+  final TextEditingController medicoController = TextEditingController();
 
-  Future<void> _agregarCita() async {
-    await citas.add({
-      'motivo': _motivoController.text,
-      'doctor': _doctorController.text,
-      'paciente': _pacienteController.text,
-      'fecha': DateTime.now(),
-    });
-    _limpiarCampos();
-  }
+  // Función para crear o actualizar cita
+  Future<void> _crearOActualizar([DocumentSnapshot? documentSnapshot]) async {
+    String accion = 'crear';
+    if (documentSnapshot != null) {
+      accion = 'actualizar';
+      motivoController.text = documentSnapshot['motivo'];
+      fechaController.text = documentSnapshot['fecha'];
+      horaInicioController.text = documentSnapshot['horaInicio'];
+      horaFinController.text = documentSnapshot['horaFin'];
+      pacienteController.text = documentSnapshot['paciente'];
+      medicoController.text = documentSnapshot['medico'];
+    }
 
-  Future<void> _actualizarCita(String id) async {
-    await citas.doc(id).update({
-      'motivo': _motivoController.text,
-      'doctor': _doctorController.text,
-      'paciente': _pacienteController.text,
-    });
-    _limpiarCampos();
-  }
-
-  Future<void> _eliminarCita(String id) async {
-    await citas.doc(id).delete();
-  }
-
-  void _limpiarCampos() {
-    _motivoController.clear();
-    _doctorController.clear();
-    _pacienteController.clear();
-    _selectedCitaId = null;
-  }
-
-  void _mostrarFormulario(BuildContext context, {bool esEdicion = false}) {
-    showModalBottomSheet(
-      context: context,
+    await showModalBottomSheet(
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          top: 20,
-          left: 20,
-          right: 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              esEdicion ? 'Actualizar Cita' : 'Agendar Nueva Cita',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+      context: context,
+      builder: (BuildContext ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: motivoController,
+                  decoration: const InputDecoration(labelText: 'Motivo de la cita'),
+                ),
+                TextField(
+                  controller: fechaController,
+                  decoration: const InputDecoration(labelText: 'Fecha (DD/MM/AAAA)'),
+                ),
+                TextField(
+                  controller: horaInicioController,
+                  decoration: const InputDecoration(labelText: 'Hora de inicio'),
+                ),
+                TextField(
+                  controller: horaFinController,
+                  decoration: const InputDecoration(labelText: 'Hora de fin'),
+                ),
+                TextField(
+                  controller: pacienteController,
+                  decoration: const InputDecoration(labelText: 'Paciente'),
+                ),
+                TextField(
+                  controller: medicoController,
+                  decoration: const InputDecoration(labelText: 'Médico'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: Text(accion == 'crear' ? 'Crear cita' : 'Actualizar cita'),
+                  onPressed: () async {
+                    final String motivo = motivoController.text;
+                    final String fecha = fechaController.text;
+                    final String horaInicio = horaInicioController.text;
+                    final String horaFin = horaFinController.text;
+                    final String paciente = pacienteController.text;
+                    final String medico = medicoController.text;
+
+                    if (motivo.isNotEmpty &&
+                        fecha.isNotEmpty &&
+                        horaInicio.isNotEmpty &&
+                        horaFin.isNotEmpty &&
+                        paciente.isNotEmpty &&
+                        medico.isNotEmpty) {
+                      if (accion == 'crear') {
+                        await citas.add({
+                          "motivo": motivo,
+                          "fecha": fecha,
+                          "horaInicio": horaInicio,
+                          "horaFin": horaFin,
+                          "paciente": paciente,
+                          "medico": medico,
+                          "creadoEn": Timestamp.now(),
+                        });
+                      }
+
+                      if (accion == 'actualizar') {
+                        await citas.doc(documentSnapshot!.id).update({
+                          "motivo": motivo,
+                          "fecha": fecha,
+                          "horaInicio": horaInicio,
+                          "horaFin": horaFin,
+                          "paciente": paciente,
+                          "medico": medico,
+                        });
+                      }
+
+                      motivoController.clear();
+                      fechaController.clear();
+                      horaInicioController.clear();
+                      horaFinController.clear();
+                      pacienteController.clear();
+                      medicoController.clear();
+
+                      Navigator.of(context).pop();
+                    }
+                  },
+                )
+              ],
             ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _motivoController,
-              decoration: const InputDecoration(
-                labelText: 'Motivo',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _doctorController,
-              decoration: const InputDecoration(
-                labelText: 'Doctor',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _pacienteController,
-              decoration: const InputDecoration(
-                labelText: 'Paciente',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.save),
-              label: Text(esEdicion ? 'Actualizar Cita' : 'Guardar Cita'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              onPressed: () {
-                if (esEdicion && _selectedCitaId != null) {
-                  _actualizarCita(_selectedCitaId!);
-                } else {
-                  _agregarCita();
-                }
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Función para eliminar cita
+  Future<void> _eliminarCita(String citaId) async {
+    await citas.doc(citaId).delete();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Cita eliminada exitosamente.'),
+        backgroundColor: Colors.redAccent,
       ),
     );
   }
@@ -123,136 +151,81 @@ class _CitasPageState extends State<CitasPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.green.shade50,
       appBar: AppBar(
-        title: const Text('Gestión de Citas Médicas'),
-        backgroundColor: Colors.teal,
-        centerTitle: true,
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Gestión de Citas',
+          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Colors.green),
+        elevation: 2,
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Botón Agendar Cita
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: const Text('Agendar Cita'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      minimumSize: const Size(150, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+      body: StreamBuilder(
+        stream: citas.orderBy('creadoEn', descending: true).snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+          if (streamSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Colors.green));
+          }
+
+          if (!streamSnapshot.hasData || streamSnapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No hay citas registradas.',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            );
+          }
+
+          final citasDocs = streamSnapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: citasDocs.length,
+            itemBuilder: (context, index) {
+              final DocumentSnapshot documentSnapshot = citasDocs[index];
+
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                color: Colors.white,
+                elevation: 3,
+                child: ListTile(
+                  leading: const Icon(Icons.calendar_month, color: Colors.green),
+                  title: Text(
+                    documentSnapshot['motivo'],
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  subtitle: Text(
+                    '📅 ${documentSnapshot['fecha']} | 🕒 ${documentSnapshot['horaInicio']} - ${documentSnapshot['horaFin']}\n👨‍⚕️ ${documentSnapshot['medico']}',
+                  ),
+                  trailing: SizedBox(
+                    width: 96,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.green),
+                          onPressed: () => _crearOActualizar(documentSnapshot),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () => _eliminarCita(documentSnapshot.id),
+                        ),
+                      ],
                     ),
-                    onPressed: () => _mostrarFormulario(context),
                   ),
                 ),
-                const SizedBox(width: 16),
-                // Botón Consejos Médicos
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.medical_services_outlined),
-                    label: const Text('Consejos Médicos'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueGrey,
-                      minimumSize: const Size(150, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Recuerda beber agua, dormir bien y hacer ejercicio regularmente 💪',
-                          ),
-                          duration: Duration(seconds: 3),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Citas registradas',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const Divider(),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: citas.orderBy('fecha', descending: true).snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Error al cargar las citas'),
-                  );
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final data = snapshot.data!.docs;
-
-                if (data.isEmpty) {
-                  return const Center(child: Text('No hay citas registradas'));
-                }
-
-                return ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    final doc = data[index];
-                    final cita = doc.data() as Map<String, dynamic>;
-                    final fecha = (cita['fecha'] as Timestamp).toDate();
-
-                    return Card(
-                      margin:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 4,
-                      child: ListTile(
-                        title: Text(cita['motivo']),
-                        subtitle: Text(
-                            'Dr. ${cita['doctor']} — Paciente: ${cita['paciente']}\n${fecha.toLocal()}'),
-                        isThreeLine: true,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.teal),
-                              onPressed: () {
-                                setState(() {
-                                  _selectedCitaId = doc.id;
-                                  _motivoController.text = cita['motivo'];
-                                  _doctorController.text = cita['doctor'];
-                                  _pacienteController.text = cita['paciente'];
-                                });
-                                _mostrarFormulario(context, esEdicion: true);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _eliminarCita(doc.id),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
+        onPressed: () => _crearOActualizar(),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
