@@ -7,8 +7,8 @@ import 'pages/home_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/messages_page.dart';
 import 'pages/settings_page.dart';
-import 'pages/login_page.dart'; 
-
+import 'pages/login_page.dart';
+import 'pages/citas_page.dart'; 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -38,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/mensajes': (context) => const MensajesPage(),
         '/configuracion': (context) => const ConfiguracionPage(),
         '/login': (context) => const LoginPage(),
+        '/citas': (context) => const CitasPage(), 
       },
     );
   }

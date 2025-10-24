@@ -10,7 +10,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-
   final user = FirebaseAuth.instance.currentUser;
 
   void _onItemTapped(int index) {
@@ -48,30 +47,47 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 30),
 
-            // --- Botones principales ---
+            // --- Botones principales simétricos ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _mainOption(
-                  icon: Icons.calendar_today,
-                  text: "Agendar Cita",
-                  color: Colors.green,
-                  onTap: () {},
+                Expanded(
+                  child: _mainOption(
+                    icon: Icons.calendar_today,
+                    text: "Agendar Cita",
+                    color: Colors.green,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/citas');
+                    },
+                  ),
                 ),
-                _mainOption(
-                  icon: Icons.healing,
-                  text: "Consejos Médicos",
-                  color: Colors.lightGreen,
-                  onTap: () {},
+                const SizedBox(width: 18),
+                Expanded(
+                  child: _mainOption(
+                    icon: Icons.healing,
+                    text: "Consejos Médicos",
+                    color: Colors.lightGreen,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Sección de consejos en desarrollo 🩺"),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
+
             const SizedBox(height: 40),
 
             const Text(
               "Especialistas",
               style: TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
             ),
             const SizedBox(height: 16),
             _buildSpecialistList(),
@@ -81,14 +97,20 @@ class _HomePageState extends State<HomePage> {
             const Text(
               "Recomendaciones del día",
               style: TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
             ),
             const SizedBox(height: 10),
             _recommendationCard(
-                "Mantén una buena hidratación y evita el exceso de cafeína."),
+              "Mantén una buena hidratación y evita el exceso de cafeína.",
+            ),
           ],
         ),
       ),
+
+      // --- Barra de navegación inferior ---
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         currentIndex: _selectedIndex,
@@ -104,6 +126,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // --- Widget para los botones principales ---
   Widget _mainOption({
     required IconData icon,
     required String text,
@@ -113,24 +136,31 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 140,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: color),
+          border: Border.all(color: color, width: 1.5),
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 40),
-            const SizedBox(height: 10),
-            Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Text(
+              text,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  // --- Lista de especialistas ---
   Widget _buildSpecialistList() {
     final specialists = [
       "Cardiólogo",
@@ -156,12 +186,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // --- Tarjeta de recomendación ---
   Widget _recommendationCard(String text) {
     return Card(
       color: Colors.green.shade50,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(text, style: const TextStyle(fontSize: 16)),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, color: Colors.black87),
+        ),
       ),
     );
   }
