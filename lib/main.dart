@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_page/pages/graphics_page.dart';
 import 'firebase_options.dart';
 
 import 'pages/home_page.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/configuracion': (context) => const ConfiguracionPage(),
         '/login': (context) => const LoginPage(),
         '/citas': (context) => const CitasPage(), 
+        '/graficas': (context) => const GraphicsPage(),
       },
     );
   }
