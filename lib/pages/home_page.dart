@@ -121,7 +121,6 @@ class _HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Inicio"),
           BottomNavigationBarItem(icon: Icon(Icons.message), label: "Mensajes"),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Gráficas"),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Configuración"),
         ],
       ),
