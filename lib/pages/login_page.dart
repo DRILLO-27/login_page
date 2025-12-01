@@ -155,14 +155,18 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             try {
+                              // 1. INICIAR SESIÓN
                               UserCredential userCredential =
                                   await _auth.signInWithEmailAndPassword(
                                 email: emailController.text.trim(),
                                 password: passwordController.text.trim(),
                               );
 
-                              // ✅ Redirige al HomePage después del login
-                              Navigator.pushReplacementNamed(context, '/home');
+                              // IMPORTANTE:
+                              // Eliminamos el Navigator manual.
+                              // Dejamos que main.dart detecte el cambio y redirija solo.
+
+                              if (!mounted) return; // Chequeo de seguridad
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -178,6 +182,8 @@ class _LoginPageState extends State<LoginPage> {
                                 message = "Usuario no encontrado";
                               } else if (e.code == 'wrong-password') {
                                 message = "Contraseña incorrecta.";
+                              } else if (e.code == 'invalid-credential') {
+                                message = "Credenciales inválidas.";
                               } else {
                                 message = "Error: ${e.message}";
                               }
@@ -195,6 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 20),
                       TextButton(
                         onPressed: () {
+                          // Aquí iría tu navegación al registro
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("Función de registro pendiente."),
