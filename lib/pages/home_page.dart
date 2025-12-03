@@ -15,8 +15,7 @@ class _HomePageState extends State<HomePage> {
   void _onItemTapped(int index) {
     if (index == 0) return;
     if (index == 1) Navigator.pushNamed(context, '/mensajes');
-    if (index == 2) Navigator.pushNamed(context, '/graficas');
-    if (index == 3) Navigator.pushNamed(context, '/configuracion');
+    if (index == 2) Navigator.pushNamed(context, '/configuracion');
   }
 
   @override

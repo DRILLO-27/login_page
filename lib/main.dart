@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
         '/mensajes': (context) => const MensajesPage(),
         '/configuracion': (context) => const ConfiguracionPage(),
         '/login': (context) => const LoginPage(),
-        '/qcitas': (context) => const CitasPage(), 
+        '/citas': (context) => const CitasPage(), 
         '/doctor_home': (context) => const DoctorDashboardPage(),
         '/graficas': (context) => const GraphicsPage(),
       },
