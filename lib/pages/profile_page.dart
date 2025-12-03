@@ -117,7 +117,7 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // --- Botón de cerrar sesión ---
+                // --- Botón de cerrar sesión CORREGIDO ---
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -128,9 +128,15 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
+                    // 1. Cerrar sesión en Firebase
                     await FirebaseAuth.instance.signOut();
-                    // Regresar al login
-                    Navigator.pushReplacementNamed(context, '/login');
+                    
+                    // 2. CORRECCIÓN IMPORTANTE:
+                    // En lugar de "empujar" el login, "volvemos" al inicio (main.dart).
+                    // Esto evita que se duplique la pantalla de login y arregla el bloqueo.
+                    if (context.mounted) {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
                   },
                   icon: const Icon(Icons.logout),
                   label: const Text("Cerrar sesión"),
